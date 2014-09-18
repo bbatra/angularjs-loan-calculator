@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html ng-app = "app">
+ <head>
+
+     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js">
+  </script>
+  <script type="text/javascript" src="js/loanApp.js">
+  </script>
+  <script type="text/javascript" src="js/controllers/altController.js">
+  </script>
+     <script type="text/javascript" src="js/controllers/dateController.js">
+     </script>
+  <script type="text/javascript" src="js/services/CalculateService.js">
+  </script>
+
+     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+     <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+     <script>
+         $(function() {
+             $( "#datepicker" ).datepicker({ dateFormat: "mm/dd/yy" });
+         });
+     </script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+     <style type = "text/css">
+         .label
+         {
+             display: inline-block;
+             width: 100px;
+             color: Black;
+             font-size: 12px;
+         }
+
+         .ui-datepicker
+         {
+             background: #CCF5FF;
+             border: 1px black;
+             color: #333;
+             width: 155px;
+             position: relative;
+
+         }
+
+         table, tr, td, th
+         {
+             text-align: center;
+
+         }
+         .table-striped
+         {
+             border-spacing: 10;
+             padding: 10;
+         }
+
+         /*.table-striped>tbody>tr:nth-child(odd)>td,*/
+         /*.table-striped>tbody>tr:nth-child(odd)>th {*/
+             /*background-color: #80B2CC;*/
+         /*}*/
+     </style>
+
+</head>
+
+<body>
+
+<BR>
+
+<div>
+    <div class="panel panel-info">
+        <div class = "panel-heading">
+            <H3 align="middle"> Loan Calculator </H3></center>
+        </div>
+    </div>
+
+    <div class = "container well">
+
+        <div ng-controller = "altCtrl" class = "form-group">
+
+            <div class="row">
+                <div class = "col-md-6" style = "margin-top: 40px">
+
+                    <div class = "row fieldColumn">
+
+                            <label class = "label">Account Name </label>
+
+
+                            <input type="text" name="name" ng-model="name">
+                            <br>
+
+                    </div>
+
+                    <div class = "row fieldColumn">
+
+                            <label class = "label">Loan Amount </label>
+
+
+                            <input type="text" name="amount" ng-model="amount">
+                            <br>
+
+                    </div>
+
+
+                    <div class = "row fieldColumn">
+
+                            <label class = "label">Down Payment </label>
+
+                            <input type="text" name="downPayment" ng-model="downPayment">
+                            <br>
+
+                    </div>
+
+                    <!--<div class = "row fieldColumn">-->
+                        <!--<label class = "label">Interest Rate</label>-->
+                        <!--<input type="text" ng-model = "rate"><BR>-->
+                    <!--</div>-->
+
+                    <div class = "row fieldColumn">
+
+                            <label class = "label">Interest Rate </label>
+
+                            <input type="text" name="rate" ng-model="rate">
+                            <br>
+
+                    </div>
+
+                    <!--<div class = "row fieldColumn">-->
+                        <!--<label class = "label"> Interest Type </label>-->
+                        <!--<select ng-model="interestType" style="width: 155px">-->
+                            <!--<option value="simple">Simple Interest</option>-->
+                            <!--<option value="compound">Compound Interest</option>-->
+                        <!--</select>-->
+                        <!--<br>-->
+                    <!--</div>-->
+
+                    <div class = "row fieldColumn">
+
+                            <label class = "label">Interest Type </label>
+
+                            <select ng-model="interestType" style="width: 155px">
+                            <option value="simple">Simple Interest</option>
+                            <option value="compound">Compound Interest</option>
+                            </select>
+                            <br>
+
+                    </div>
+
+                    <div class = "row fieldColumn">
+
+                            <label class = "label">Start Date </label>
+
+
+
+                        <!--<input type="date"-->
+                               <!--ng-model="startdate"-->
+                               <!--value="{{ startdate | date: 'MM/dd/yyyy' }}" />-->
+                            <input type="text" datepicker id="datepicker" ng-model="startdate" is-open="opened" datepicker-popup="{{format}}" ng-click="dateChange();">
+                            <br>
+
+                    </div>
+
+
+                    <div class = "row fieldColumn">
+
+                            <label class = "label"> Year Length
+                            </label>
+                            <select ng-model = "yearType" style="width: 155px">
+                                <option value="bankyear">360 Days (Bank Year)</option>
+                                <option value="fullyear">365 Days </option>
+                            </select>
+                            <br>
+
+                    </div>
+
+
+                    <div class = "row fieldColumn">
+                        <label class = "label">
+                            Term Length
+                        </label>
+                        <input type="text" ng-model = "termLength">
+                        <input type = "radio" name = "termType" ng-model = "termType" value="months"> Months
+                        <input type = "radio" name = "termType" ng-model = "termType" value="years"> Years
+                        <br>
+                    </div>
+
+                    <div class = "row fieldColumn">
+                        <label class = "label">Monthly Payment</label>
+                        <input type="text" ng-model = "totalmonthlypaymentvalue" disabled style="margin-left: 5px; width:150px"><BR>
+                    </div>
+
+                     <div class = "row fieldColumn">
+                        <button  class="btn btn-primary active" ng-click="enter(); showme=true;" style="margin-left: 105px; width: 75px;">Submit </button>
+                        <button  class="btn btn-default active" ng-click="clear(); showme=false;" style=" width: 75px">Reset </button>
+                     </div>
+
+                </div>
+                <div class="col-md-6 col-md-offset-6" style="margin-top: -280px; position: relative" ng-show="showme">
+
+                    <table class = "table-striped" ng-show = "showme">
+                        <tr>
+
+                            <th>
+                                Month
+                            </th>
+
+                            <th>
+                                Monthly Payment
+                            </th>
+                            <th>
+                                Monthly Interest
+                            </th>
+                            <th>
+                                Daily Payment
+                            </th>
+                            <th>
+                                Total Amount Paid
+                            </th>
+                            <th>
+
+                            </th>
+
+                        </tr>
+                        <tr ng-repeat-start = "month in monthlyInfo">
+
+                            <td>
+                                {{month.startdisplay}}
+                            </td>
+
+
+                            <td>
+                                {{month.totalpayment}}
+                            </td>
+                            <td>
+                                {{month.monthlyinterest}}
+                            </td>
+                            <td>
+                                {{month.dailytotal}}
+                            </td>
+                            <td>
+                                {{month.paidsofar}}
+                            </td>
+
+                            <td>
+                                <button ng-if="month.expanded" ng-click="month.expanded = false" class="btn btn-inverse btn-xs" style="width: 21px">
+                                    <i class="icon-minus">-</i>
+                                </button>
+                                <button ng-if="!month.expanded" ng-click="month.expanded = true" class="btn btn-inverse btn-xs">
+                                    <i class="icon-plus">+</i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr ng-if="month.expanded" ng-repeat-end="">
+                            <td colspan="12">
+                                <table class="table" ng-show="month.expanded">
+                                    <tr>
+                                        <th>
+                                            Day
+                                        </th>
+                                        <th>
+                                            Amount Due
+                                        </th>
+                                        <th>
+                                            Paid So far
+                                        </th>
+                                    </tr>
+
+                                    <tr ng-repeat = "day in month.dailyinfo">
+                                        <td>
+                                            {{day.day}}
+                                        </td>
+                                        <td>
+                                            {{day.amount}}
+                                        </td>
+                                        <td>
+                                            {{day.paidsofar}}
+                                        </td>
+                                        <td>
+                                            <button ng-if="month.expanded" ng-click="month.expanded = false" class="btn btn-inverse btn-xs" style="width: 21px">
+                                                <i class="icon-minus">-</i>
+                                               </button>
+                                        </td>
+                                    </tr>
+
+
+                                </table>
+
+                            </td>
+                        </tr>
+
+
+
+
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
