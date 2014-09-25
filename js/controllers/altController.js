@@ -1,7 +1,6 @@
 loanApp.controller("altCtrl", function($scope, $log, CalculateService)
 {
 
-    $scope.result;
     $scope.totalmonthlypayment;
     $scope.totalmonthlypaymentvalue;
 
@@ -11,11 +10,11 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
     $scope.monthlyInfo = [];//first month only for test
 
     $scope.termType = "months";
-    $scope.interestType = "simple";
-    $scope.yearType = "fullyear";
+    $scope.interestType = "compound";
+    $scope.yearType = "bankyear";
     $scope.format = "dd/mm/yyy";
-    $scope.finalpayment;
     $scope.express = false;
+    $scope.dateToBeChanged = 0;
 
     $scope.formatDate = function(date)
     {
@@ -32,10 +31,123 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
             mm= '0' + mm;
         }
 
-        //$log.info("NEW DATE: " + mm + '/' + dd + '/' + yyyy);
-
         return (mm + '/' + dd + '/' + yyyy);
 
+    }
+
+    $scope.getMonthData = function(date, monthsToAdd)
+    {
+
+        date = new Date(date);
+        var month = new Array();
+        month[0] =
+        {
+            name: "January",
+            days: 31
+        };
+        month[1] =
+        {
+            name: "February",
+            days: 28
+        };
+
+        month[2] =
+        {
+            name: "March",
+            days: 31
+        };
+
+        month[3] =
+        {
+            name: "April",
+            days: 30
+        };
+
+        month[4] =
+        {
+            name: "May",
+            days: 31
+        };
+
+        month[5] =
+        {
+            name: "June",
+            days: 30
+        };
+
+        month[6] =
+        {
+            name: "July",
+            days: 31
+        };
+        month[7] =
+        {
+            name: "August",
+            days: 31
+        };
+
+        month[8] =
+        {
+            name: "September",
+            days: 30
+        };
+
+        month[9] =
+        {
+            name: "October",
+            days: 31
+        };
+
+        month[10] =
+        {
+            name: "November",
+            days: 30
+        };
+
+        month[11] =
+        {
+            name: "December",
+            days: 31
+        };
+        if(monthsToAdd===null || angular.isUndefined(monthsToAdd))
+            var result = month[date.getMonth()];
+        else
+            var result = month[(date.getMonth() + Number(monthsToAdd))%12]
+        return result;
+    }
+
+    $scope.getValidDate = function(date, monthsToAdd)
+    {
+        var self = this;
+        var currentDate = new Date(date);
+        var dd = currentDate.getDate();
+        var dayNum = dd;
+        var mm = currentDate.getMonth() + Number(1);
+        var yyyy = currentDate.getFullYear();
+        var newMonth = this.getMonthData(currentDate, monthsToAdd);
+
+        if (Number(dd)>newMonth.days)
+        {
+            dd = newMonth.days;
+        }
+
+        if(Number(yyyy) % Number(4) === 0 && dd === 28 && dayNum > 28)
+        {
+            dd = 29;
+        }
+
+
+        if(dd<10)
+        {
+            dd = '0' + dd;
+        }
+        if(mm<10)
+        {
+            mm= '0' + mm;
+        }
+
+
+        return CalculateService.addMonthsToDate((mm+'/'+dd+'/'+yyyy), monthsToAdd);
     }
 
     $scope.expressSettings = function()
@@ -50,33 +162,10 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         }
     }
 
-    //var date = (Number(new Date().getMonth)+Number(2) )+ "/01/" + new Date().getFullYear;
-
-    //$scope.startdate= "02/07/2014";
-
-
-//    $scope.setDate = function()
-//    {
-//        var today = new Date();
-//        var dd = today.getDate();
-//        var mm = today.getMonth()+1;
-//        var yyyy = today.getFullYear();
-//        if(dd<10)
-//        {
-//            dd = '0' + dd;
-//        }
-//        if(mm<10)
-//        {
-//            mm= '0' + mm;
-//        }
-//
-//        return (mm + '/' + dd + '/' + yyyy);
-//    }
-
     $scope.setStartDate = function()
     {
         var today = new Date();
-        var mm = Number(today.getMonth())+Number(2);
+        var mm = Number(today.getMonth())+Number(2);//default start date is first day of next month
         var dd = '01';
         var yyyy = today.getFullYear();
         return (mm + '/' + dd + '/' + yyyy);
@@ -85,16 +174,14 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
     }
 
     $scope.startdate= $scope.setStartDate();
-    //$scope.startdate = $scope.formatDate(new Date());
-
 
     $scope.loan =
 	{
 			name  : "John Doe",
 			amount  : "0.00",
             downPayment: "0.00",
-			interestType  : "simple",
-			yearType  : "fullyear",
+			interestType  : "compound",
+			yearType  : "bankyear",
 			termLength  : "12",
 			rate  : "0.0",
             startdate: $scope.startdate
@@ -106,22 +193,11 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         return x.toString() === s;
     }
 
-	$scope.enter = function(data)
+
+    $scope.enter = function(data)
 	{
 
         var self = this;
-
-        $log.info("DATE ENTERED: " + self.startdate);
-
-//        var name = self.name;
-//        var amount = self.amount;
-//        var downPayment = self.downPayment;
-//        var interestType = self.interestType;
-//        var yearType = self.yearType;
-//        var termLength = self.termLength;
-//        var rate = self.rate;
-//        var startdate = self.startdate;
-
 
 		if (angular.isUndefined(self.name) || self.name ===null)
 		{
@@ -147,12 +223,6 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
             self.downPayment=0.0;
             $log.info("Incorrect Input Format: Down Payment");
         }
-
-//		if (angular.isUndefined(self.interestType) || self.interestType ===null)
-//		{
-//            self.interestType = "simple";
-//            $log("interest type defaulted to simple");
-//		}
 
         if (angular.isUndefined(self.yearType) || self.yearType ===null)
 		{
@@ -199,7 +269,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
             self.amount = self.downPayment;
         }
 
-		self.loan = 
+		self.loan =
 		{
 			name  : self.name,
             downPayment: self.downPayment,
@@ -211,17 +281,217 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
             startdate: self.formatDate(self.startdate)
 		};
 
-        var calcresult = CalculateService.calc(self.loan);
-        if(isNaN(calcresult))
+        var monthlyPayment = CalculateService.calc(self.loan);
+        if(isNaN(monthlyPayment))
         {
-            calcresult=0;
+            monthlyPayment=0;
         }
-        self.totalmonthlypayment = calcresult;
-        self.totalmonthlypaymentvalue = parseFloat(Math.round(calcresult * 100) / 100).toFixed(2);
-
-        self.monthlyInfo = self.getMonthlyInfo();
+        self.monthlyPayment = monthlyPayment;
+        self.totalmonthlypaymentvalue = parseFloat(Math.round(monthlyPayment * 100) / 100).toFixed(2);
+        self.getResults();
 
 	}
+
+    $scope.getResults = function()
+    {
+        var self = this;
+        self.monthlyInfo = [];
+        var principal = Number(self.loan.amount) - Number(self.loan.downPayment);
+
+        var firstPayDate = new Date(self.loan.startdate).getDate();
+        var firstMonthDays = self.getMonthData(self.loan.startdate).days;
+
+
+
+        var firstPaymentInterestRate = (self.loan.rate * 0.01) / 360 * (30/firstMonthDays);
+
+        var firstPaymentInterest = firstPaymentInterestRate * principal * (firstMonthDays - firstPayDate + 1);
+        var month = new Month(self.loan.startdate, principal , firstPaymentInterest, self.loan.interestType, self.monthlyPayment, 0);
+        var i = 1; //increment variable for while loop
+
+        while(i < self.loan.termLength)
+        {
+            var prevMonth = month.getMonthObject();
+
+            var prevMonthDisplay =
+            {
+                name: prevMonth.name,
+                monthlyPayment: parseFloat(Math.round(prevMonth.monthlyPayment * 100) / 100).toFixed(2),
+                monthlyInterest: parseFloat(Math.round(prevMonth.monthlyInterest * 100) / 100).toFixed(2),
+                dailyPayment: parseFloat(Math.round(prevMonth.dailyPayment * 100) / 100).toFixed(2),
+                paidSoFar: parseFloat(Math.round(prevMonth.paidSoFar * 100) / 100).toFixed(2),
+                days: prevMonth.days
+
+            };
+            self.monthlyInfo.push(prevMonthDisplay);
+            var nextDate = self.getValidDate (self.loan.startdate, i);
+
+            month = new Month(nextDate, prevMonth.amountRemaining, prevMonth.interestRemaining, self.loan.interestType, self.monthlyPayment, prevMonth.paidSoFar);
+            i++;
+        }
+        var lastMonth = month.getMonthObject();
+
+
+        var lastMonthDisplay =
+        {
+            name: lastMonth.name,
+            monthlyPayment: parseFloat(Math.round(lastMonth.monthlyPayment * 100) / 100).toFixed(2),
+            monthlyInterest: parseFloat(Math.round(lastMonth.monthlyInterest * 100) / 100).toFixed(2),
+            dailyPayment: parseFloat(Math.round(lastMonth.dailyPayment * 100) / 100).toFixed(2),
+            paidSoFar: parseFloat(Math.round(lastMonth.paidSoFar * 100) / 100).toFixed(2),
+            days: lastMonth.days
+        };
+        self.monthlyInfo.push(lastMonthDisplay);
+    }
+
+
+    var Month = function(date, amountRemaining, interestRemaining, interestType, monthlyPayment, paidSoFar)
+    {
+        var self = this;
+        self.date = date;
+
+        self.payDay = new Date(date).getDate();
+        self.month = $scope.getMonthData(date);//name: self.month.name; numDays = self.month.days
+        self.interestType = interestType;
+        self.amount = amountRemaining;
+        self.payment = monthlyPayment;
+        self.paidSoFar = paidSoFar;
+        self.interestRemaining = interestRemaining;
+        self.interestPaid = 0;
+        self.dayArray = [];
+
+
+        var mm = new Date(date).getMonth() + Number(1);
+        var yyyy = new Date(date).getFullYear();
+
+        if(Number(yyyy)%4===0 && mm === 2)
+        {
+            self.month.days = 29;
+        }
+
+        if(mm<10)
+        {
+            mm= '0' + mm;
+        }
+
+        self.startDate = mm + '/01/' + yyyy;
+
+        var i = 1;//increment variable used to loop through days of month
+
+        var currentDate = self.startDate;
+
+        while(i <= self.month.days)
+        {
+            if (i === self.payDay)
+            {
+
+                self.amount = self.amount - Number(self.payment) + Number(self.interestRemaining);
+                self.interestPaid = self.interestRemaining;
+                self.interestRemaining = 0;
+
+            }
+
+            if(self.payDay != 1 && i<self.payDay )
+            {
+                var isRollover = true;
+                if(self.date === $scope.loan.startdate)
+                {
+                    isRollover = false;
+                }
+            }
+            else
+            {
+                var isRollover = false;
+            }
+
+            var day = new Days(currentDate, self.amount, isRollover);
+            var dailyInterest = day.getDailyInterest();
+            self.interestRemaining += dailyInterest;
+            var dayValue =
+            {
+                date: day.date,
+                interest: parseFloat(Math.round(dailyInterest * 100) / 100).toFixed(2),
+                balance: parseFloat(Math.round((self.amount + self.interestRemaining) * 100) / 100).toFixed(2)
+            };
+            self.dayArray.push(dayValue);
+            currentDate = $scope.formatDate(new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + Number(1))));
+            i++;
+        }
+
+        self.returnObject =
+        {
+            name : self.month.name,
+            monthlyPayment: self.payment,
+            days : self.dayArray,
+            monthlyInterest: self.interestPaid,
+            dailyPayment : Number(self.payment)/self.month.days,
+            paidSoFar : self.paidSoFar + Number(self.payment),
+            interestRemaining : self.interestRemaining,
+            amountRemaining: self.amount
+        };
+
+        self.getMonthObject = function()
+        {
+            return self.returnObject;
+        }
+
+    }
+
+
+    var Days = function(date, principal, isRollover)
+    {
+        var self = this;
+
+        self.isRollover = isRollover;
+
+        self.principal = principal;
+        self.date = date;
+
+
+
+
+        self.getDaysInYear = function()
+        {
+            var daysInYear = 360;
+
+            return daysInYear;
+        }
+
+        self.getDaysInMonth = function()
+        {
+            if (self.isRollover === true)
+            {
+                //in rollover case, number of days between paydates equals number of days in previous month
+                var monthDays = $scope.getMonthData(self.date, Number(11)).days;
+            }
+            else
+            {
+                var monthDays = $scope.getMonthData(self.date).days;
+            }
+            if(Number(new Date(self.date).getFullYear()) % Number(4) === 0)
+            {
+
+                if (monthDays === 28)
+                    monthDays = 29;
+            }
+
+            return monthDays;
+        }
+
+
+        self.getDailyInterest = function()
+        {
+            var yearlyInterest = $scope.loan.rate * 0.01 * self.principal;
+            var dailyInterest = yearlyInterest / self.getDaysInYear();
+
+            dailyInterest *= (30/self.getDaysInMonth());//interest calculated on a 30 day month basis
+                                                        //to get daily amount divide by number of days in month
+
+            return dailyInterest;
+
+        }
+
+    }
 
     $scope.clear = function()
     {
@@ -229,16 +499,19 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         this.name = null ;
         this.amount  = null;
         this.downPayment= null;
-        this.interestType  = "simple";
-        this.yearType  = "fullyear";
+        this.interestType  = "compound";
+        this.yearType  = "bankyear";
         this.termLength = null;
         this.termType = "months"
         this.rate  = null;
+        this.totalmonthlypaymentvalue = 0.00;
+        this.dateToBeChanged = 0;
     }
 
-    $scope.getLastDateOfMonth= function(startdate, ytype)
+    $scope.getLastDateOfMonth= function(startdate)
     {
         var self = this;
+        var ytype = self.loan.yearType;
         if(ytype === "fullyear")
         {
             var nextmonth =  CalculateService.addMonthsToDate(startdate, Number(1));
@@ -251,364 +524,35 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         }
 
         return self.formatDate(lastdate);
-
-
     }
 
-    $scope.getMonthName = function(date)
-    {
-
-        date = new Date(date);
-        var month = new Array();
-        month[0] = "January";
-        month[1] = "February";
-        month[2] = "March";
-        month[3] = "April";
-        month[4] = "May";
-        month[5] = "June";
-        month[6] = "July";
-        month[7] = "August";
-        month[8] = "September";
-        month[9] = "October";
-        month[10] = "November";
-        month[11] = "December";
-        var name = month[date.getMonth()];
-        $log.info("NAME:" + name);
-        return name;
-    }
-
-
-
-    $scope.getDailyAmount = function(startdate, lastdate, total)
-    {
-        var self = this;
-        var days = CalculateService.dateDifference(startdate, lastdate) + Number(1);
-        var dailytotal = Number(total) / Number(days);
-        return dailytotal;
-    }
 
     $scope.focusChange = function() //to account for jquery date update
     {
-        $scope.loan.startdate = document.getElementById("datepicker").value;
-        $scope.startdate = document.getElementById("datepicker").value;
-        $log.info("STARTDATE:" + $scope.loan.startdate);
-    }
+        var newDate = document.getElementById("datepicker").value;
+        $scope.dateToBeChanged = 0;
 
-
-    $scope.dateChange = function()
-    {
-        $log.info ("DATE CHANGED");
-        this.focusChange();
-    }
-
-
-
-    $scope.getResults = function()//NEW FUNCTION
-    {
-        var self = this;
-
-        var startDate = self.loan.startdate;
-        var yearType = self.yearType;
-        var totalRemaining = Number(self.amount) - Number(self.downPayment);
-        var monthlyTotal = Number(self.totalmonthlypayment);
-        var paidSoFar = 0;
-        var daysInYear;
-        var monthlyInfo = [];//Array to hold info for each month
-        var numberOfMonths = self.termLength;
-        var interestType = self.interestType;
-        var monthlyInterest;
-        var interestAccumulated = 0.00;
-
-        var i=0;//increment variable used in while loop to get info for each month
-
-        while(i < numberOfMonths)
+        $log.info("Initial dateToBeChanged = " + $scope.dateToBeChanged);
+        if(new Date(newDate).getDate()>28)
         {
-            if (yearType === "fullyear")
-            {
-                var lastDayOfYear = CalculateService.addMonthsToDate(start, Number(12));
-                daysInYear = CalculateService.dateDifference(start, lastDayOfYear);
-            }
-            else
-            {
-                daysInYear = 360;
-            }
+            $scope.dateToBeChanged = new Date(newDate).getDate();
 
-            var endDate = self.getLastDateOfMonth(startDate, yearType);//in MM/DD/YYYY format
-            var daysInMonth = CalculateService.dateDifference(startDate, endDate) + Number(1);
-            var dailyInterestRate = (0.01 * self.loan.rate)/Number(daysInYear);
-            var monthlyRate = dailyInterestRate * daysInMonth;
-
-
-            if(interestType==="simple")
-            {
-                monthlyInterest = monthlyRate * totalRemaining;
-            }
-            else
-            {
-                monthlyInterest = monthlyRate * (totalRemaining + interestAccumulated);
-            }
-
-            interestAccumulated += Number(monthlyInterest);
-
-
-
-
+            var date = new Date(newDate);
+            var mm = Number(date.getMonth())+Number(1);//default start date is first day of next month
+            var dd = '28';
+            var yyyy = date.getFullYear();
+            newDate = (mm + '/' + dd + '/' + yyyy);
         }
 
-    }
+        $log.info("Final dateToBeChanged = " + $scope.dateToBeChanged);
 
-    var Month = function()
-    {
+        $scope.loan.startdate = newDate;
+        $scope.startdate = newDate;
 
-    }
-
-    var Days = function()
-    {
 
     }
 
 
 
-    $scope.getMonthlyInfo = function()
-    {
-        var self = this;
 
-        var i = 0;
-        var start = self.loan.startdate;
-        var ytype = self.yearType;
-        var mtotal = Number(self.totalmonthlypayment);
-        var finalAmount = mtotal * self.termLength;
-        var base = self.monthlybasepayment;
-        var minterest = Number(self.monthlyinterest);
-        var totalpaidsofar = Number(self.downPayment);
-        var monthlyInfo = [];
-        var dailysofar = totalpaidsofar;//both start off equal to downpayment
-        var totalremaining = Number(self.amount) - Number(self.downPayment);//total remaining out of amount - used for interest recalculations
-        var totalremainingafterpayment = totalremaining;
-        var yearlastdate;
-        var daysinyear;
-
-        if(self.interestType === "simple") {
-            while (i < self.termLength)
-            {
-
-                if (ytype === "fullyear")
-                {
-                    yearlastdate = CalculateService.addMonthsToDate(start, Number(12));
-                    daysinyear = CalculateService.dateDifference(start, yearlastdate);
-                    $log.info("START DATE: " + start + "DAYS IN YEAR" + daysinyear);
-                }
-                else
-                {
-                    daysinyear = 360;
-                }
-
-
-                $log.info("Start DATE:" + i + "is :" + start);
-
-                var end = self.getLastDateOfMonth(start, ytype);
-                $log.info("LAST DATE:" + i + "is :" + end);
-
-                var dailyarr = [];
-                var dailyamt = self.getDailyAmount(start, end, mtotal);
-                var date = self.formatDate(new Date(start));
-                var j = CalculateService.dateDifference(date, end);
-
-                var dailyinterestrate = (Number(self.rate) * 0.01) / Number(daysinyear);
-
-                minterest = totalremaining * (j + Number(1)) * dailyinterestrate;
-
-                totalremainingafterpayment += minterest;
-
-                totalremaining -= Number(mtotal);
-                if (totalremaining < Number(0)) {
-                    totalremaining = 0;
-                }
-
-                // totalremainingafterpayment = totalremainingafterpayment -  Number(mtotal) + minterest;
-                totalremainingafterpayment = totalremainingafterpayment -  Number(mtotal);
-                if (totalremainingafterpayment < Number(0)) {
-                    totalremainingafterpayment = 0;
-                }
-
-                var nextstart = new Date(end);
-                nextstart = self.formatDate(new Date(nextstart.setDate(nextstart.getDate() + Number(1))));
-                var nextend = self.getLastDateOfMonth(nextstart, ytype);
-                var k = CalculateService.dateDifference(nextstart, nextend);
-                var nextminterest = totalremaining * (k+Number(1)) * dailyinterestrate;
-
-                var dailyinterest = nextminterest/(Number(1)+j);
-                var balance = totalremainingafterpayment;
-
-
-                while (j >= 0)
-                {
-
-
-                    balance += Number(dailyinterest);
-                    var dailyobj =
-                    {
-                        day: date,
-                        dailyinterest: parseFloat(Math.round(dailyinterest * 100) / 100).toFixed(2),
-                        balance: parseFloat(Math.round(balance * 100) / 100).toFixed(2)
-                    };
-
-                    dailyarr.push(dailyobj);
-                    date = self.formatDate(new Date(new Date(date).setDate(new Date(date).getDate() + Number(1))));
-                    j--;
-                }
-
-                if(ytype==="bankyear")
-                {
-                    dispmonth = self.getMonthName(end);
-                }
-                else
-                {
-                    dispmonth = self.getMonthName(start);
-                }
-
-                totalpaidsofar += Number(mtotal);
-                var monthobj =
-                {
-                    startdate: start,
-                    startdisplay: dispmonth,
-                    enddate: end,
-                    totalpayment: parseFloat(Math.round(mtotal * 100) / 100).toFixed(2),
-                    monthlyinterest: parseFloat(Math.round(minterest * 100) / 100).toFixed(2),
-                    dailytotal: parseFloat(Math.round(dailyamt * 100) / 100).toFixed(2),
-                    paidsofar: parseFloat(Math.round(totalpaidsofar * 100) / 100).toFixed(2),
-                    dailyinfo: dailyarr
-                };
-                monthlyInfo.push(monthobj);
-
-
-
-
-                start = new Date(end);
-                start = self.formatDate(new Date(start.setDate(start.getDate() + Number(1))));
-
-                i++;
-
-
-
-            }
-        }
-        else
-        {
-
-            var calcamountremaining = totalremaining;
-            while(i < self.termLength)
-            {
-
-
-                var dailyinterestrate;
-                if(ytype==="fullyear")
-                {
-                    yearlastdate = CalculateService.addMonthsToDate(start, Number(12));
-                    daysinyear = CalculateService.dateDifference(start, yearlastdate);
-                    $log.info("START DATE: " + start + "DAYS IN YEAR" + daysinyear);
-                }
-                else
-                {
-                    daysinyear = 360;
-                }
-
-
-                $log.info("Start DATE:" + i + "is :"  + start);
-
-                var end = self.getLastDateOfMonth(start, ytype);
-                $log.info("LAST DATE:" + i + "is :"  + end);
-
-                var dailyarr = [];
-                //var dailyamt = parseFloat(Math.round(self.getDailyAmount(start, end, mtotal) * 100) / 100).toFixed(2);
-                var dailyamt = self.getDailyAmount(start, end, mtotal);
-                var date = self.formatDate(new Date(start));
-                var j = CalculateService.dateDifference(date, end);
-
-
-                dailyinterestrate = (Number(self.rate) * 0.01) / Number(daysinyear);
-
-
-                minterest = calcamountremaining * (j+Number(1)) * dailyinterestrate;
-
-                totalremainingafterpayment+= Number(minterest);
-                totalremainingafterpayment = totalremainingafterpayment -  Number(mtotal);
-
-                if (totalremainingafterpayment < 0.9*(mtotal)) {
-                    totalremainingafterpayment = 0;
-                }
-
-                var nextstart = new Date(end);
-                nextstart = self.formatDate(new Date(nextstart.setDate(nextstart.getDate() + Number(1))));
-                var nextend = self.getLastDateOfMonth(nextstart, ytype);
-                var k = CalculateService.dateDifference(nextstart, nextend);
-                var nextminterest = totalremainingafterpayment * (k+Number(1)) * dailyinterestrate;
-
-                var dailyinterest = nextminterest/(Number(1)+j);
-                var balance = totalremainingafterpayment;
-                var dispmonth;
-                if(ytype==="bankyear")
-                {
-                    dispmonth = self.getMonthName(end);
-                }
-                else
-                {
-                    dispmonth = self.getMonthName(start);
-                }
-
-                while (j >= 0)
-                {
-
-
-                    balance += Number(dailyinterest);
-                    var dailyobj =
-                    {
-                        day: date,
-                        dailyinterest: parseFloat(Math.round(dailyinterest * 100) / 100).toFixed(2),
-                        balance: parseFloat(Math.round(balance * 100) / 100).toFixed(2)
-                    };
-
-                    dailyarr.push(dailyobj);
-                    date = self.formatDate(new Date(new Date(date).setDate(new Date(date).getDate() + Number(1))));
-                    j--;
-                }
-
-
-
-                totalpaidsofar += Number(mtotal);
-                var monthobj =
-                {
-                    startdate: start,
-                    startdisplay: dispmonth,
-                    enddate: end,
-                    month:new Date(start),
-                    totalpayment: parseFloat(Math.round(mtotal * 100) / 100).toFixed(2),
-                    monthlyinterest: parseFloat(Math.round(minterest * 100) / 100).toFixed(2),
-                    dailytotal: parseFloat(Math.round(dailyamt * 100) / 100).toFixed(2),
-                    paidsofar: parseFloat(Math.round(totalpaidsofar * 100) / 100).toFixed(2),
-                    dailyinfo: dailyarr
-                };
-
-                monthlyInfo.push(monthobj);
-
-
-
-
-                start = new Date(end);
-                start = self.formatDate(new Date(start.setDate(start.getDate()+Number(1))));
-
-                i++;
-                calcamountremaining = calcamountremaining - Number(mtotal) + minterest;
-//                if (totalremaining<Number(0))
-//                {
-//                    totalremaining = 0;
-//                }
-
-
-            }
-
-        }
-        self.finalpayment = totalpaidsofar;
-        return monthlyInfo;
-    }
 });

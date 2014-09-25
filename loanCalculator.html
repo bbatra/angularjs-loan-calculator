@@ -34,6 +34,13 @@
              font-size: 12px;
          }
 
+         .error
+         {
+             color: red;
+             font-size: 15px;
+             background: #F9FBFB;
+         }
+
          .ui-datepicker
          {
              background: #CCF5FF;
@@ -168,15 +175,23 @@
                                 <label class = "label">Start Date </label>
                             </div>
                             <div class = "col-md-6">
-                                <input type="text" datepicker id="datepicker" ng-model="startdate" ng-click="dateChange();">
+                                <input type="text" datepicker id="datepicker" ng-model="startdate" >
                             </div>
                         </div>
+
+                        <div class = "row top-border" ng-show = "dateToBeChanged != 0;">
+                            <div class = "col-md-8 col-md-offset-4 error" >
+                                 <sup>*</sup>Not every month has {{dateToBeChanged}} days.
+                            </div>
+                        </div>
+
+
                         <div class = "row top-border">
                             <div class = "col-md-6">
                                 <label class = "label">Down Payment </label>
                             </div>
                             <div class = "col-md-6">
-                                <input type="text" name="downPayment" ng-model="downPayment">
+                                <input type="text" name="downPayment" ng-model="downPayment" ng-click="focusChange();">
                             </div>
                         </div>
                         <div class = "row top-border">
@@ -191,18 +206,7 @@
                             </div>
                         </div>
 
-                        <div class = "row top-border">
-                            <div class = "col-md-6">
-                                <label class = "label"> Year Length
-                                </label>
-                            </div>
-                            <div class = "col-md-6">
-                                <select ng-model = "yearType" style="width:100%;border:1px; padding: 5px;">
-                                    <option value="bankyear">360 Days (Bank Year)</option>
-                                    <option value="fullyear">365 Days </option>
-                                </select>
-                            </div>
-                        </div>
+
                     </div>
 
                     <div class = "row top-border">
@@ -255,16 +259,16 @@
                         </div>
 
                         <div class="table-row col-md-12" ng-repeat-start = "month in monthlyInfo">
-                            <div class=" col-md-2" style = "text-align: left;"> {{month.startdisplay}}</div>
-                            <div class=" col-md-2" style = "text-align: center;"> {{month.totalpayment}}</div>
-                            <div class=" col-md-2" style = "text-align: center;"> {{month.monthlyinterest}}</div>
-                            <div class=" col-md-2" style = "text-align: center;"> {{month.dailytotal}}</div>
-                            <div class=" col-md-2" style = "text-align: center;"> {{month.paidsofar}}</div>
+                            <div class=" col-md-2" style = "text-align: left;"> {{month.name}}</div>
+                            <div class=" col-md-2" style = "text-align: center;"> {{month.monthlyPayment}}</div>
+                            <div class=" col-md-2" style = "text-align: center;"> {{month.monthlyInterest}}</div>
+                            <div class=" col-md-2" style = "text-align: center;"> {{month.dailyPayment}}</div>
+                            <div class=" col-md-2" style = "text-align: center;"> {{month.paidSoFar}}</div>
                             <div class=" col-md-2" style = "text-align: center;">
                                 <button ng-if="month.expanded"
                                         ng-click="month.expanded = false"
                                         class="btn btn-inverse btn-xs"
-                                        >
+                                        style = "width: 21px;">
 
                                     <i class="icon-minus">-</i>
                                 </button>
@@ -290,12 +294,12 @@
                                         </B>
                                     </div>
 
-                                    <div ng-repeat = "day in month.dailyinfo">
+                                    <div ng-repeat = "day in month.days">
                                         <div class = "col-md-4" style = "text-align: center;">
-                                            {{day.day}}
+                                            {{day.date}}
                                         </div>
                                         <div class = "col-md-4" style = "text-align: center;">
-                                            {{day.dailyinterest}}
+                                            {{day.interest}}
                                         </div>
                                         <div class = "col-md-4" style = "text-align: center;">
                                             {{day.balance}}

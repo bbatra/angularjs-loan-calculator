@@ -44,6 +44,17 @@
 
         }
 
+        .table-row:nth-of-type(odd) {
+            background: #F9FBFB;
+            width: 100%;
+        }
+        .table-row:nth-of-type(even) {
+            background: white;
+            width: 100%;
+        }
+
+
+
         table, tr, td, th
         {
             text-align: center;
@@ -215,7 +226,7 @@
     <div class = "row top-border">
         <div class = "col-md-offset-6 col-md-6" >
             <!--<div class = "col-md-3">-->
-            <button  class="btn btn-primary active" ng-click="enter(); showme=true;" style="width:50%; text-align: center;">Calculate </button>
+            <button  class="btn btn-primary active" ng-click="focusChange(); enter(); showme=true;" style="width:50%; text-align: center;">Calculate </button>
             <!--</div>-->
             <!--<div class = "col-md-offset-3 col-md-3">-->
             <button  class="btn btn-default active" ng-click="clear(); showme=false; " style="width:46%; text-align: center;">Reset </button>
@@ -230,80 +241,75 @@
 
 <div class="col-md-offset-1 col-md-7 "  ng-show="showme">
 
-    <table class = "table-striped" ng-show = "showme">
-        <tr>
+    <div  ng-show = "showme">
+        <div class="table-row col-md-12">
+            <B>
 
-            <th style = "text-align: left;">Month</th>
-            <th>Monthly Payment</th>
-            <th>Monthly Interest</th>
-            <th>Daily Payment</th>
-            <th>Amount Paid Till Date</th>
-            <th></th>
-        </tr>
+                <div class="col-md-2" style = "text-align: left;">Month</div>
+                <div class="col-md-2" style = "text-align: center;" >Monthly Payment</div>
+                <div class="col-md-2" style = "text-align: center;">Monthly Interest</div>
+                <div class="col-md-2" style = "text-align: center;">Daily Payment</div>
+                <div class="col-md-2" style = "text-align: center;">Paid Till Date</div>
+                <div class="col-md-2" style = "text-align: center;">  </div>
+            </B>
+        </div>
 
-        <tr ng-repeat-start = "month in monthlyInfo">
-            <td style = "text-align: left;"> {{month.startdisplay}}</td>
-            <td> {{month.totalpayment}}</td>
-            <td> {{month.monthlyinterest}}</td>
-            <td> {{month.dailytotal}}</td>
-            <td> {{month.paidsofar}}</td>
-            <td>
+        <div class="table-row col-md-12" ng-repeat-start = "month in monthlyInfo">
+            <div class=" col-md-2" style = "text-align: left;"> {{month.name}}</div>
+            <div class=" col-md-2" style = "text-align: center;"> {{month.monthlyPayment}}</div>
+            <div class=" col-md-2" style = "text-align: center;"> {{month.monthlyInterest}}</div>
+            <div class=" col-md-2" style = "text-align: center;"> {{month.dailyPayment}}</div>
+            <div class=" col-md-2" style = "text-align: center;"> {{month.paidSoFar}}</div>
+            <div class=" col-md-2" style = "text-align: center;">
                 <button ng-if="month.expanded"
                         ng-click="month.expanded = false"
                         class="btn btn-inverse btn-xs"
-                        style="width: 21px">
+                        style = "width: 21px;">
 
                     <i class="icon-minus">-</i>
                 </button>
                 <button ng-if="!month.expanded" ng-click="month.expanded = true" class="btn btn-inverse btn-xs">
                     <i class="icon-plus">+</i>
                 </button>
-            </td>
-        </tr>
-        <tr ng-if="month.expanded" ng-repeat-end="">
-            <td colspan="12">
-                <table class="table" ng-show="month.expanded">
-                    <tr>
-                        <th>
-                            Day
-                        </th>
-                        <th>
-                            Daily Interest
-                        </th>
-                        <th>
-                            Account Balance
-                        </th>
-                    </tr>
+            </div>
+        </div>
+        <div class="table-row col-md-12 " ng-if="month.expanded" ng-repeat-end="">
+            <div>
+                <B>
+                    <div class = "col-md-4" style = "text-align: center;">
+                        Date
+                    </div>
+                    <div class = "col-md-4" style = "text-align: center;">
+                        Daily Interest
+                    </div>
+                    <div class = "col-md-4" style = "text-align: center;">
+                        Account Balance
+                    </div>
+                    <div class="col-md-offset-2">
+                    </div>
+                </B>
+            </div>
 
-                    <tr ng-repeat = "day in month.dailyinfo">
-                        <td>
-                            {{day.day}}
-                        </td>
-                        <td>
-                            {{day.dailyinterest}}
-                        </td>
-                        <td>
-                            {{day.balance}}
-                        </td>
-                        <!--<td>-->
-                        <!--<button ng-if="month.expanded" ng-click="month.expanded = false" class="btn btn-inverse btn-xs" style="width: 21px">-->
-                        <!--<i class="icon-minus">-</i>-->
-                        <!--</button>-->
-                        <!--</td>-->
-                    </tr>
-
-
-                </table>
-
-            </td>
-        </tr>
+            <div ng-repeat = "day in month.days">
+                <div class = "col-md-4" style = "text-align: center;">
+                    {{day.date}}
+                </div>
+                <div class = "col-md-4" style = "text-align: center;">
+                    {{day.interest}}
+                </div>
+                <div class = "col-md-4" style = "text-align: center;">
+                    {{day.balance}}
+                </div>
+                <div class="col-md-offset-2">
+                </div>
 
 
 
+            </div>
 
-    </table>
+        </div>
 
-</div>
+    </div>
 </div>
 </div>
 </div>
