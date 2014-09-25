@@ -219,13 +219,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         self.totalmonthlypayment = calcresult;
         self.totalmonthlypaymentvalue = parseFloat(Math.round(calcresult * 100) / 100).toFixed(2);
 
-        self.monthlybasepayment = (Number(self.amount) - Number(self.downPayment)) / self.termLength;
-        self.monthlyinterest = self.totalmonthlypayment - self.monthlybasepayment;
-
-
         self.monthlyInfo = self.getMonthlyInfo();
-        $log.info("CALCRESULT: " + self.totalmonthlypayment);
-
 
 	}
 
@@ -293,7 +287,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         return dailytotal;
     }
 
-    $scope.focusChange = function()
+    $scope.focusChange = function() //to account for jquery date update
     {
         $scope.loan.startdate = document.getElementById("datepicker").value;
         $scope.startdate = document.getElementById("datepicker").value;
@@ -306,6 +300,74 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         $log.info ("DATE CHANGED");
         this.focusChange();
     }
+
+
+
+    $scope.getResults = function()//NEW FUNCTION
+    {
+        var self = this;
+
+        var startDate = self.loan.startdate;
+        var yearType = self.yearType;
+        var totalRemaining = Number(self.amount) - Number(self.downPayment);
+        var monthlyTotal = Number(self.totalmonthlypayment);
+        var paidSoFar = 0;
+        var daysInYear;
+        var monthlyInfo = [];//Array to hold info for each month
+        var numberOfMonths = self.termLength;
+        var interestType = self.interestType;
+        var monthlyInterest;
+        var interestAccumulated = 0.00;
+
+        var i=0;//increment variable used in while loop to get info for each month
+
+        while(i < numberOfMonths)
+        {
+            if (yearType === "fullyear")
+            {
+                var lastDayOfYear = CalculateService.addMonthsToDate(start, Number(12));
+                daysInYear = CalculateService.dateDifference(start, lastDayOfYear);
+            }
+            else
+            {
+                daysInYear = 360;
+            }
+
+            var endDate = self.getLastDateOfMonth(startDate, yearType);//in MM/DD/YYYY format
+            var daysInMonth = CalculateService.dateDifference(startDate, endDate) + Number(1);
+            var dailyInterestRate = (0.01 * self.loan.rate)/Number(daysInYear);
+            var monthlyRate = dailyInterestRate * daysInMonth;
+
+
+            if(interestType==="simple")
+            {
+                monthlyInterest = monthlyRate * totalRemaining;
+            }
+            else
+            {
+                monthlyInterest = monthlyRate * (totalRemaining + interestAccumulated);
+            }
+
+            interestAccumulated += Number(monthlyInterest);
+
+
+
+
+        }
+
+    }
+
+    var Month = function()
+    {
+
+    }
+
+    var Days = function()
+    {
+
+    }
+
+
 
     $scope.getMonthlyInfo = function()
     {
