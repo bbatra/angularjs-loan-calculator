@@ -1,4 +1,4 @@
-loanApp.controller("altCtrl", function($scope, $log, CalculateService)
+loanApp.controller("altCtrl", function($scope, $log, CalculateService, DateService)
 {
 
     $scope.totalmonthlypayment;
@@ -16,140 +16,9 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
     $scope.express = false;
     $scope.dateToBeChanged = 0;
 
-    $scope.formatDate = function(date)
-    {
-        date = new Date(date);
-        var dd = date.getDate();
-        var mm = date.getMonth()+Number(1);
-        var yyyy = date.getFullYear();
-        if(dd<10)
-        {
-            dd = '0' + dd;
-        }
-        if(mm<10)
-        {
-            mm= '0' + mm;
-        }
+    
 
-        return (mm + '/' + dd + '/' + yyyy);
-
-    }
-
-    $scope.getMonthData = function(date, monthsToAdd)
-    {
-
-        date = new Date(date);
-        var month = new Array();
-        month[0] =
-        {
-            name: "January",
-            days: 31
-        };
-        month[1] =
-        {
-            name: "February",
-            days: 28
-        };
-
-        month[2] =
-        {
-            name: "March",
-            days: 31
-        };
-
-        month[3] =
-        {
-            name: "April",
-            days: 30
-        };
-
-        month[4] =
-        {
-            name: "May",
-            days: 31
-        };
-
-        month[5] =
-        {
-            name: "June",
-            days: 30
-        };
-
-        month[6] =
-        {
-            name: "July",
-            days: 31
-        };
-        month[7] =
-        {
-            name: "August",
-            days: 31
-        };
-
-        month[8] =
-        {
-            name: "September",
-            days: 30
-        };
-
-        month[9] =
-        {
-            name: "October",
-            days: 31
-        };
-
-        month[10] =
-        {
-            name: "November",
-            days: 30
-        };
-
-        month[11] =
-        {
-            name: "December",
-            days: 31
-        };
-        if(monthsToAdd===null || angular.isUndefined(monthsToAdd))
-            var result = month[date.getMonth()];
-        else
-            var result = month[(date.getMonth() + Number(monthsToAdd))%12]
-        return result;
-    }
-
-    $scope.getValidDate = function(date, monthsToAdd)
-    {
-        var self = this;
-        var currentDate = new Date(date);
-        var dd = currentDate.getDate();
-        var dayNum = dd;
-        var mm = currentDate.getMonth() + Number(1);
-        var yyyy = currentDate.getFullYear();
-        var newMonth = this.getMonthData(currentDate, monthsToAdd);
-
-        if (Number(dd)>newMonth.days)
-        {
-            dd = newMonth.days;
-        }
-
-        if(Number(yyyy) % Number(4) === 0 && dd === 28 && dayNum > 28)
-        {
-            dd = 29;
-        }
-
-
-        if(dd<10)
-        {
-            dd = '0' + dd;
-        }
-        if(mm<10)
-        {
-            mm= '0' + mm;
-        }
-
-
-        return CalculateService.addMonthsToDate((mm+'/'+dd+'/'+yyyy), monthsToAdd);
-    }
-
+    
     $scope.expressSettings = function()
     {
         if(this.express === true)
@@ -162,18 +31,8 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
         }
     }
 
-    $scope.setStartDate = function()
-    {
-        var today = new Date();
-        var mm = Number(today.getMonth())+Number(2);//default start date is first day of next month
-        var dd = '01';
-        var yyyy = today.getFullYear();
-        return (mm + '/' + dd + '/' + yyyy);
-
-
-    }
-
-    $scope.startdate= $scope.setStartDate();
+    
+    $scope.startdate= DateService.setStartDate();
 
     $scope.loan =
 	{
@@ -261,7 +120,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
 
         if (angular.isUndefined(self.startdate) || self.startdate ===null)
         {
-            self.startdate = self.formatDate(new Date());
+            self.startdate = DateService.formatDate(new Date());
         }
 
         if(self.downPayment >= self.amount)
@@ -278,7 +137,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
 			yearType  : self.yearType,
 			termLength  :  self.termLength,
 			rate  : self.rate,
-            startdate: self.formatDate(self.startdate)
+            startdate: DateService.formatDate(self.startdate)
 		};
 
         var monthlyPayment = CalculateService.calc(self.loan);
@@ -292,14 +151,14 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
 
 	}
 
-    $scope.getResults = function()
+    $scope.getResults = function()//should this be in calculateService?
     {
         var self = this;
         self.monthlyInfo = [];
         var principal = Number(self.loan.amount) - Number(self.loan.downPayment);
 
         var firstPayDate = new Date(self.loan.startdate).getDate();
-        var firstMonthDays = self.getMonthData(self.loan.startdate).days;
+        var firstMonthDays = DateService.getMonthData(self.loan.startdate).days;
 
 
 
@@ -324,7 +183,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
 
             };
             self.monthlyInfo.push(prevMonthDisplay);
-            var nextDate = self.getValidDate (self.loan.startdate, i);
+            var nextDate = DateService.getValidDate (self.loan.startdate, i);
 
             month = new Month(nextDate, prevMonth.amountRemaining, prevMonth.interestRemaining, self.loan.interestType, self.monthlyPayment, prevMonth.paidSoFar);
             i++;
@@ -345,13 +204,13 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
     }
 
 
-    var Month = function(date, amountRemaining, interestRemaining, interestType, monthlyPayment, paidSoFar)
+    var Month = function(date, amountRemaining, interestRemaining, interestType, monthlyPayment, paidSoFar)//should this be in calculateService?
     {
         var self = this;
         self.date = date;
 
         self.payDay = new Date(date).getDate();
-        self.month = $scope.getMonthData(date);//name: self.month.name; numDays = self.month.days
+        self.month = DateService.getMonthData(date);//name: self.month.name; numDays = self.month.days
         self.interestType = interestType;
         self.amount = amountRemaining;
         self.payment = monthlyPayment;
@@ -414,7 +273,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
                 balance: parseFloat(Math.round((self.amount + self.interestRemaining) * 100) / 100).toFixed(2)
             };
             self.dayArray.push(dayValue);
-            currentDate = $scope.formatDate(new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + Number(1))));
+            currentDate = DateService.formatDate(new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + Number(1))));
             i++;
         }
 
@@ -438,7 +297,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
     }
 
 
-    var Days = function(date, principal, isRollover)
+    var Days = function(date, principal, isRollover)//should this be in calculateService?
     {
         var self = this;
 
@@ -462,13 +321,13 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
             if (self.isRollover === true)
             {
                 //in rollover case, number of days between paydates equals number of days in previous month
-                var monthDays = $scope.getMonthData(self.date, Number(11)).days;
+                var monthDays = DateService.getMonthData(self.date, Number(11)).days;
             }
             else
             {
-                var monthDays = $scope.getMonthData(self.date).days;
+                var monthDays = DateService.getMonthData(self.date).days;
             }
-            if(Number(new Date(self.date).getFullYear()) % Number(4) === 0)
+            if(Number(new Date(self.date).getFullYear()) % Number(4) === 0)//Leap Year check
             {
 
                 if (monthDays === 28)
@@ -495,7 +354,7 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
 
     $scope.clear = function()
     {
-        this.startdate = this.setStartDate();
+        this.startdate = DateService.setStartDate();
         this.name = null ;
         this.amount  = null;
         this.downPayment= null;
@@ -510,20 +369,11 @@ loanApp.controller("altCtrl", function($scope, $log, CalculateService)
 
     $scope.getLastDateOfMonth= function(startdate)
     {
-        var self = this;
+       
         var ytype = self.loan.yearType;
-        if(ytype === "fullyear")
-        {
-            var nextmonth =  CalculateService.addMonthsToDate(startdate, Number(1));
-            var lastdate = new Date(new Date(nextmonth).setDate(new Date(nextmonth).getDate() - Number(1)));
+        
 
-        }
-        else
-        {
-            var lastdate = new Date(new Date(startdate).setDate(new Date(startdate).getDate() + Number(29)));
-        }
-
-        return self.formatDate(lastdate);
+        return DateService.getLastDateOfMonth(startdate, ytype);
     }
 
 

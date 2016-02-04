@@ -21,52 +21,7 @@ loanApp.service('CalculateService', function($log)
 
     }
 
-    this.dateDifference = function(startdate, enddate)
-    {
-        var j = 0;
-        var start = new Date(startdate);
-        var end = new Date(enddate)
-        while(start < end)
-        {
-            j++;
-            start = new Date(start.setDate(start.getDate()+Number(1)));
-        }
-
-        //$log.info("Date Diff = " + (Number(j)));
-
-        return j;
-
-    }
-
-    this.addMonthsToDate = function (startdate, months)
-    {
-        var dd = new Date(startdate).getDate();
-        var mm = Number(new Date(startdate).getMonth())+Number(1); //January is 0!
-        var yyyy = new Date(startdate).getFullYear();
-        var nm = (Number(mm)+Number(months))%12;//new month for end date
-        if (nm===0)
-        {
-            nm = 12;
-        }
-
-        var ydiff =  Math.ceil((Number(mm)+Number(months))/12) - Number(1);//difference in the year number
-
-        var nyyy = Number(yyyy) + Number(ydiff);
-        var nd = dd;//day is the same since we are only adding whole months right now
-
-        if(nd<10)
-        {
-            nd = '0' + nd;
-        }
-        if(nm<10)
-        {
-            nm= '0' + nm;
-        }
-        var enddate = nm + '/' + nd + '/' + nyyy;
-
-        return enddate;
-
-    }
+    
 
     //used to calculate monthly payment for amortized loan
     this.getResult = function(amt, rate, time, downpayment, ytype, payDate)

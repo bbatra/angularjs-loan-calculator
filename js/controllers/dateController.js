@@ -32,7 +32,6 @@ loanApp.controller("dateCtrl", function($scope, $log)
     };
 
 
-
     $scope.dateOptions = {
         formatYear: 'yy',
         startingDay: 1

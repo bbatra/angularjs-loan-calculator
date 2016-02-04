@@ -13,6 +13,8 @@
      </script>
   <script type="text/javascript" src="js/services/CalculateService.js">
   </script>
+    <script type="text/javascript" src="js/services/DateService.js">
+  </script>
 
      <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
      <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
@@ -181,7 +183,7 @@
 
                         <div class = "row top-border" ng-show = "dateToBeChanged != 0;">
                             <div class = "col-md-8 col-md-offset-4 error" >
-                                 <sup>*</sup>Not every month has {{dateToBeChanged}} days.
+                                 <sup>*</sup>Please pick a day less than {{dateToBeChanged}}
                             </div>
                         </div>
 
